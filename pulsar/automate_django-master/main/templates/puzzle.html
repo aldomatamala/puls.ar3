@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    {% extends 'base.html' %}
+    {% block content %}
+
+     <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>Websocket tests</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    {% comment %}
+    <link rel="stylesheet" type="text/css" media="screen" href="main.css" />
+    {% endcomment %}
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reconnecting-websocket/1.0.0/reconnecting-websocket.js"></script>
+    <audio id="itero" src="https://www.soundjay.com/button/button-4.mp3" autoplay="false" ></audio>
+    <audio id="murga" src="https://www.mboxdrive.com/murga.mp3"  ></audio>
+    <title>Rompecabezas !!</title>
+   
+  
+    <style media="screen">
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      .content {
+        text-align: center;
+      }
+      .content h1 {
+        color: #1296DB;
+      }
+      .main_box {
+        width: 500px;
+        height: 500px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border: 1px solid #ffffff;
+      }
+      #disorganizeBtn{
+        width: 150px;
+        height: 100px;
+        margin-top: 30px;
+        font-weight: 900;
+        color: rgb(7, 7, 7);
+        background-color: crimson;
+        border-radius: 20px;
+        border-width: 5px;
+
+        outline: none;
+      }
+      #startBtn{
+        width: 150px;
+        height: 100px;
+        margin-top: 30px;
+        font-weight: 900;
+        color: #030303;
+        background-color: #09ff00;
+        border-radius: 20px;
+        border-width: 5px;
+        outline: none;
+      }
+   
+    </style>
+  </head>
+  <style>
+    html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    background-color: rgb(255, 255, 255);
+    overflow: hidden;
+}
+  </style>
+  <body>
+    
+    
+    <div class="content">
+      <h1>Rompecabezas !</h1>
+    </canvas>
+      <div class="main_box">
+        <canvas id="myCanvas">
+          您的浏览器不支持canvas标签！
+        </canvas>
+
+      </div>
+ 
+
+      <button id="disorganizeBtn">DESORDENAR</button>
+      <button id="startBtn">EMPEZAR</button>
+      <!--<button id="stopBtn">PARAR</button>-->
+      
+     
+    </div>
+   <div role="alert" aria-live="assertive" aria-atomic="true" class="toast">
+          <div class="toast-header">
+            <strong class="mr-auto">Notification</strong>
+            <small>11 mins ago</small>
+            <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="toast-body">
+        </div>
+      </div>
+    </div>
+     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js">
+    </script>
+    
+
+
+    </script>
+    <script type="text/javascript">
+const init = Symbol('init'),
+  imgDrawCanvas = Symbol('imgDrawCanvas');
+
+//获取对应的CanvasRenderingContext2D对象(画笔)、图片对象
+let ctx = {},
+  img = {};
+let completado=false;
+function sonidoMurga() {
+          var sound = document.getElementById("murga");
+          sound.play();
+          completado=true;
+          
+      }
+      function sonidoIteracion() {
+          var sound = document.getElementById("itero");
+          sound.play();
+      }
+      
+// 图片自动拼图
+class automaticPuzzle {
+
+  constructor({canvas, imgUrl, across, vertical}){
+    //获取Canvas对象(画布)
+    this.canvas = canvas;
+    this.imgUrl = imgUrl;
+    // 切分横、竖块数
+    this.iLen = across;
+    this.jLen = vertical;
+    // 随机图像坐标存储对象
+    this.randomObj = {};
+    // 初始化
+    this[init]();
+  }
+
+  // 初始化
+  async [init] () {
+    // 获取图片原始大小
+    const imgSize = await imgOriginalSizeFn(this.imgUrl);
+    // 容器 Css
+    let canvasParentStyle = window.getComputedStyle(this.canvas.parentNode, null);
+    // 容器宽、高
+    this.wrapperW = parseInt(canvasParentStyle.width);
+    this.wrapperH = parseInt(canvasParentStyle.height);
+    // 图片宽、高
+    this.imgW = parseInt(imgSize.width);
+    this.imgH = parseInt(imgSize.height);
+    // canvas 宽、高计算
+    let canvasWH = canvasWHFn(this.wrapperW, this.wrapperH, this.imgW, this.imgH);
+    // canvas 宽、高
+    this.canvas.width = canvasWH.width;
+    this.canvas.height = canvasWH.height;
+    //简单地检测当前浏览器是否支持Canvas对象，以免在一些不支持html5的浏览器中提示语法错误
+    if (this.canvas.getContext) {
+      //获取对应的CanvasRenderingContext2D对象(画笔)
+      this.ctx = this.canvas.getContext("2d");
+      //创建新的图片对象
+      img = new Image();
+      //指定图片的URL
+      img.src = this.imgUrl;
+      //浏览器加载图片完毕后再绘制图片
+      img.onload = () => {
+        this.img = img;
+        // *** img 画 canvas ***
+        this[imgDrawCanvas]();
+      };
+    }
+  }
+
+  // *** img 画 canvas ***
+  [imgDrawCanvas] (randomObj) {
+    // 切分 图 / canvas 每块宽、切分 图 / canvas 每块高、宽切分个数、高切分个数、画 canvas参数
+    let {ctx, img, canvas, imgW, imgH, iLen, jLen} = this,
+      blockImgW = imgW / iLen,
+      blockImgH = imgH / jLen,
+      blockWrapperW = canvas.width / iLen,
+      blockWrapperH = canvas.height / jLen;
+    if (!randomObj) {
+      for (let i = 0; i < iLen; i++) {
+        for (let j = 0; j < jLen; j++) {
+          // 图片区域起点坐标、图片区域终点坐标、canvas起点坐标、canvas终点坐标
+          ctx.drawImage(img, i * blockImgW, j * blockImgH, (i + 1) * blockImgW, (j + 1) * blockImgH, i * blockWrapperW, j * blockWrapperH, (i + 1) * blockWrapperW, (j + 1) * blockWrapperH);
+        }
+      }
+    } else {
+      for (let i in randomObj) {
+        for (let j in randomObj[i]) {
+          let item = randomObj[i][j];
+          // 图片区域起点坐标、图片区域终点坐标、canvas起点坐标、canvas终点坐标
+          ctx.drawImage(img, item.x * blockImgW, item.y * blockImgH, (item.x + 1) * blockImgW, (item.y + 1) * blockImgH, parseInt(i) * blockWrapperW, parseInt(j) * blockWrapperH, (item.x + 1) * blockWrapperW, (item.y + 1) * blockWrapperH);
+          // 判断是否找到对应块
+          if (item.x === parseInt(i) && item.y === parseInt(j)) {
+            randomObj[i][j].status = true;
+          }
+        }
+      }
+      return randomObj;
+    }}
+    // canvas、随机对象、横切块数、竖切块数
+    puzzleDisorganize () {
+    let {canvas, randomObj, iLen, jLen} = this;
+    // 有随机对象且已开始还原
+    if (randomObj && canvas.timer) return false;
+    randomObj = this[imgDrawCanvas](randomImgObj({iLen, jLen}));
+    // 回传
+    this.randomObj = randomObj;
+  }
+
+  // 根据乱序拼图随机图片自动还原
+  puzzleStart (speed) {
+    // canvas、随机对象、横切块数、竖切块数
+    let {canvas, randomObj, iLen, jLen} = this;
+    // 计时器存在时不开启新的还原
+    if (canvas.timer) return -1;
+    // 完成还原不开启新的还原
+    if (!canvas.timer && checkedIsClear(randomObj)) return false;
+    canvas.timer = setInterval(() => {
+      if (randomObj && checkedIsClear(randomObj)) {
+        clearInterval(canvas.timer);
+        // 删除属性，用于重启
+        delete canvas.timer;
+        sonidoMurga();
+      }
+      // img 画 canvas
+      randomObj = this[imgDrawCanvas](randomImgObj({randomObj, iLen, jLen}));
+      // 回传随机对象
+      this.randomObj = randomObj;
+    }, speed);
+    return true;
+  }
+  puzzleStart2(speed){
+    let {canvas, randomObj} = this;
+    this.puzzleStart(speed);
+     let c1 = document.getElementById('startBtn');
+     c1.style.borderStyle="inset";
+     c1.style.backgroundColor="#9cff99";
+    setTimeout(() => {
+      clearInterval(canvas.timer);
+      //terminar();
+    // 删除属性，用于重启
+      delete canvas.timer;
+      if(!completado)
+        sonidoIteracion();
+      c1.style.borderStyle="outset";
+      c1.style.backgroundColor="#09ff00";
+    },3000);
+  }
+  terminar(){
+    clearInterval(canvas.timer);
+    delete canvas.timer;
+    if(checkedIsClear(randomObj))
+       playSound();
+  }
+ 
+
+  // 停止拼图
+  puzzleStop () {
+    // canvas、随机对象
+    let {canvas, randomObj} = this;
+    // 没产生随机对象且未开始还原
+    if (!(randomObj && canvas.timer)) return false;
+    clearInterval(canvas.timer);
+    // 删除属性，用于重启
+    delete canvas.timer;
+    return true;
+  }
+
+};
+
+// 检查是否已完全找到对的块，是则清除定时器
+checkedIsClear = (randomObj) => {
+  if (randomObj) {
+    for (let i in randomObj) {
+      for (let j in randomObj[i]) {
+        if (!randomObj[i][j].status) return false;
+      }
+    }
+    return true;
+  }
+},
+
+// 随机数组
+randomImgObj = ({randomObj = {}, iLen, jLen}) => {
+  // 随机图像坐标存储对象
+  for (let i = 0; i < iLen; i++) {
+    if (!randomObj[i]) randomObj[i] = {};
+    for (let j = 0; j < jLen; j++) {
+      if (randomObj[i][j] && randomObj[i][j].status) {
+        continue;
+      }
+      randomObj[i][j] = {x: randomFn({max: iLen - 1}), y: randomFn({max: jLen - 1}), status: false};
+    }
+  }
+  return randomObj;
+},
+
+// 随机数方法
+randomFn = ({min = 0, max}) => {
+  return Math.floor(Math.random() * ( max - min + 1) + min);
+},
+
+
+
+// 计算 canvas 宽、高
+canvasWHFn = (wrapperW, wrapperH, imgW, imgH) => {
+  // 图宽、高比
+  let imgAspectRatio = imgW / imgH,
+    // 容器宽、高比
+    wrapperAspectRatio = wrapperW / wrapperH,
+    // 返回宽、高
+    width = 0,
+    height = 0;
+  if (imgAspectRatio > wrapperAspectRatio) {
+    // 图宽、高比 > 容器宽、高比时，按容器宽为100%计算高
+    width = wrapperW;
+    height = width / imgAspectRatio;
+  } else if (imgAspectRatio < wrapperAspectRatio) {
+    // 图宽、高比 < 容器宽、高比时，按容器高为100%计算宽
+    height = wrapperH;
+    width = height * imgAspectRatio;
+  } else {
+    // 图宽、高比 === 容器宽、高比时，按容器宽、高为canvas宽高
+    width = wrapperW;
+    height = wrapperH;
+  }
+  return {width, height}
+},
+
+// 获取图片原始大小
+imgOriginalSizeFn = (imgUrl) => {
+  return new Promise((resolve, reject) => {
+    let img = new Image();
+    img.src = imgUrl;
+    img.onload = function () {  //图片加载完成
+       resolve({
+         width: img.width,
+         height: img.height
+       });
+    };
+  });
+};
+    </script>
+    <script type="text/javascript">
+      window.onload = () => {
+        // canvas DOM node
+        const canvas = document.getElementById('myCanvas');
+        // init canvas
+        const puzzle = new automaticPuzzle({
+          // canvas DOM
+          canvas,
+          // 图片地址
+          //naru 
+          imgUrl: 'https://depor.com/resizer/me_fJ5sn969y-yoSQrazVNYTftY=/980x528/smart/arc-anglerfish-arc2-prod-elcomercio.s3.amazonaws.com/public/YPD3NNJ4OZFU5CLBPWHI5RVU3A.jpg',
+          //murga
+          //imgUrl: 'https://i.ibb.co/xqDcmQT/murga.jpg',
+          //imgUrl: document.getElementById("imagenfondo");
+          // 横切块数
+          across: 5,
+          // 竖切块数
+          vertical: 5
+        });
+
+          let cargar = document.getElementById("cargarBtn");
+          let nuevaImg=document.getElementById("imagenfondo");
+         /* cargar.onclick  = () => {
+            //puzzle.cambiarImg(nuevaImg);
+            //const canvas = document.getElementById('myCanvas');
+        // init canvas
+           puzzle = new automaticPuzzle({
+          // canvas DOM
+          canvas,
+          // 图片地址
+          imgUrl: nuevaImg,
+          //imgUrl: document.getElementById("imagenfondo");
+          // 横切块数console.log(window.location);
+    var loc = window.location;
+    var wsStart = "ws://";
+    if (loc.protocol == "https:") {
+      wsStart = "wss://";
+    }
+    var endpoint = wsStart + loc.host + loc.pathname + "/";
+    var socket = new ReconnectingWebSocket(endpoint);
+
+    socket.onmessage = function(e) {
+      // console.log("message");
+      console.log(e.data);
+      // console.log(typeof(e.data));
+      var obj = JSON.parse(e.data);
+      // console.log(obj['name']);
+      // console.log(obj['status']);
+      $('#'+obj['name']).val(obj['status']);
+      $('#'+obj['name']).html(obj['status'].toString());
+      $('.toast').toast('show')
+      $('.toast-body').html(obj['name'] + ' turned ' + obj['status'])   
+      
+      if(obj['name']=='pantalla')
+        puzzle.puzzleStart2(200);
+      if(obj['name']=='p2')
+      puzzle.puzzleDisorganize();
+
+      if(typeof obj['status2']!=='undefined')
+      {
+      let c1 = document.getElementById('disorganizeBtn');
+      if(obj['status2'])
+        c1.style.color="#A52A2A";
+      else
+        c1.style.color="#F0FFFF";
+      }
+     
+    };
+  //   let c1 = document.getElementById('disorganizeBtn');
+  //  if(obj['status']){
+  //     puzzle.puzzleStart2(200);
+  //     c1.style.color="#A52A2A";
+  //  }
+  //   else{c1.style.color="#F0FFFF";
+  //   }
+      // if(typeof obj['status2']!=='undefined')
+      // {
+      //   if(obj['status2'])
+      //     let c1 = document.getElementById('disorganizeBtn').style.color="#F0FFFF";//F0FFFF
+      //   else 
+      //     let c1 = document.getElementById('disorganizeBtn').style.color="#A52A2A";//"#A52A2A"
+      // }
+    socket.onopen = function(e) {
+      console.log("open", e);
+    };
+    socket.onerror = function(e) {
+      console.log("error", e);
+    };
+    socket.onclose = function(e) {
+      console.log("close", e);
+    };
+    function send(name) {dmin/
+      // status = (status == 'true');
+      // console.log(!status);
+      // if(id=='#on') {
+      //   $(id).html('off')
+      // } else {
+      //   $(id).html('on')
+      // }
+      var status = $('#'+name).val()
+      // console.log('status' + typeof(status));
+      status = (status == 'true');
+      var data = {
+        name: name,
+        status: !status
+      };
+      socket.send(JSON.stringify(data));
+*/
+
+          
+          
+            
+
+        let disorganize = document.getElementById('disorganizeBtn');
+        // disorganize
+        disorganize.onclick = () => {
+          puzzle.puzzleDisorganize();
+        }
+
+        let start = document.getElementById('startBtn');
+        // start
+        start.onclick = () => {
+          // speed
+         // if (!puzzle.puzzleStart(200)) alert('未打乱顺序，请先打乱！');
+            puzzle.puzzleStart2(100);
+        }
+
+        let stop = document.getElementById('stopBtn');
+        // stop
+        // stop.onclick = () => {
+        //   if (!puzzle.puzzleStop()) alert('未开始还原，请开启还原！');
+        // }
+
+
+//----------
+
+      function vibrate(ms){
+      navigator.vibrate(ms);
+    }
+    console.log(window.location);
+    var loc = window.location;
+    var wsStart = "ws://";
+    if (loc.protocol == "https:") {
+      wsStart = "wss://";
+    }
+    var endpoint = wsStart + loc.host + loc.pathname + "/";
+    var socket = new ReconnectingWebSocket(endpoint);
+
+    socket.onmessage = function(e) {
+      // console.log("message");
+      console.log(e.data);
+      // console.log(typeof(e.data));
+      var obj = JSON.parse(e.data);
+      // console.log(obj['name']);
+      // console.log(obj['status']);
+      $('#'+obj['name']).val(obj['status']);
+      $('#'+obj['name']).html(obj['status'].toString());
+      $('.toast').toast('show')
+      $('.toast-body').html(obj['name'] + ' turned ' + obj['status'])   
+      
+      if(obj['name']=='pantalla')
+      {
+        puzzle.puzzleStart2(100);
+      }
+      if(obj['name']=='p2')
+      puzzle.puzzleDisorganize();
+
+      if(typeof obj['status2']!=='undefined')
+      {
+      let c1 = document.getElementById('disorganizeBtn');
+      if(obj['status2'])
+        c1.style.color="#A52A2A";
+      else
+        c1.style.color="#F0FFFF";
+      }
+     
+    };
+  //   let c1 = document.getElementById('disorganizeBtn');
+  //  if(obj['status']){
+  //     puzzle.puzzleStart2(200);
+  //     c1.style.color="#A52A2A";
+  //  }
+  //   else{c1.style.color="#F0FFFF";
+  //   }
+      // if(typeof obj['status2']!=='undefined')
+      // {
+      //   if(obj['status2'])
+      //     let c1 = document.getElementById('disorganizeBtn').style.color="#F0FFFF";//F0FFFF
+      //   else 
+      //     let c1 = document.getElementById('disorganizeBtn').style.color="#A52A2A";//"#A52A2A"
+      // }
+    socket.onopen = function(e) {
+      console.log("open", e);
+    };
+    socket.onerror = function(e) {
+      console.log("error", e);
+    };
+    socket.onclose = function(e) {
+      console.log("close", e);
+    };
+    function send(name) {
+      // status = (status == 'true');
+      // console.log(!status);
+      // if(id=='#on') {
+      //   $(id).html('off')
+      // } else {
+      //   $(id).html('on')
+      // }
+      var status = $('#'+name).val()
+      // console.log('status' + typeof(status));
+      status = (status == '</canvas>true');
+      var data = {
+        name: name,
+        status: !status
+      };
+      socket.send(JSON.stringify(data));
+    }
+//----------
+
+
+
+
+
+      }
+ 
+    </script>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+  {% endblock %}
+
+  </body>
+</html>

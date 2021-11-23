@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    {% extends 'base.html' %}
+    {% block content %}
+  <meta charset="UTF-8">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/reconnecting-websocket/1.0.0/reconnecting-websocket.js"></script>
+
+  <title>Galeria</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    div#carousel { 
+  perspective: 1200px; 
+  background: #ffffff; 
+  padding-top: 10%; 
+  font-size:0; 
+  margin-bottom: 3rem; 
+  overflow: hidden; 
+}
+figure#spinner { 
+  transform-style: preserve-3d; 
+  height: 300px; 
+  transform-origin: 50% 50% -500px; 
+  transition: 1s; 
+} 
+figure#spinner img { 
+  width: 40%; max-width: 425px; 
+  position: absolute; left: 30%;
+  transform-origin: 50% 50% -500px;
+  outline:1px solid transparent; 
+}
+figure#spinner img:nth-child(1) { transform:rotateY(0deg); }
+figure#spinner img:nth-child(2) { transform: rotateY(-45deg); }
+figure#spinner img:nth-child(3) { transform: rotateY(-90deg); }
+figure#spinner img:nth-child(4) { transform: rotateY(-135deg); }
+figure#spinner img:nth-child(5){ transform: rotateY(-180deg); }
+figure#spinner img:nth-child(6){ transform: rotateY(-225deg); }
+figure#spinner img:nth-child(7){ transform: rotateY(-270deg); }
+figure#spinner img:nth-child(8){ transform: rotateY(-315deg); }
+span#izquierdo { 
+  color: rgb(0, 0, 0);
+  background-color: rgb(236, 14, 14);
+  border-style: double;
+  border-width: 10px;
+  border-color:rgb(255, 0, 0); 
+  margin: 5%; 
+  font-size: 3rem; 
+  transition: 0.6s color; 
+  position: relative; 
+  margin-top: -2rem; 
+  border-bottom: 4px; 
+  line-height: 2; }
+  span#derecho { 
+  color: rgb(0, 0, 0);
+  background-color: rgb(9, 255, 0);
+  border-style: double;
+  border-width: 10px;
+  border-color:rgb(30, 255, 0); 
+  margin: 5%; 
+  font-size: 3rem; 
+  transition: 0.6s color; 
+  position: relative; 
+  margin-top: -2rem; 
+  border-bottom: 4px; 
+  line-height: 2; }
+div#carousel ~ span:hover { color: rgb(246, 16, 16); cursor: pointer; }
+  </style>   
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prefixfree/1.0.7/prefixfree.min.js"></script>
+
+</head>
+<body>
+<!-- partial:index.partial.html -->
+<style>
+  h1 {
+    text-align: center;
+  }
+  </style>
+<br>
+  <h1>Galeria</h1>
+  </div>
+
+
+<style>
+@import url(https://fonts.googleapis.com/css?family=Nunito);
+
+
+
+h1 { width: 100%;
+    height: 100%;
+    margin: 0;
+    background-color: rgb(255, 255, 255);
+    overflow: hidden;
+}
+
+</style>
+<!-- <base href="https://s3-us-west-2.amazonaws.com/s.cdpn.io/4273/wanaka-tree.jpg"> -->
+<div id="carousel">
+  
+  <figure id="spinner">
+
+    <!-- <img src="wanaka-tree.jpg" alt>-->
+    <img src="https://media3.giphy.com/media/qdFCb59rXKZ1K/giphy.gif?cid=ecf05e47kg4hdxyaro542zvt1ludmly8lqfjn0xlzso8x8mb&rid=giphy.gif&ct=g" alt="My image">
+    <img src="https://media4.giphy.com/media/EjJgeEVUCfuTe/giphy.gif?cid=790b7611c5e4dec13af6cb45ecd50aaab57f2f634b404aac&rid=giphy.gif&ct=g" alt="My image">
+    <img src="https://media1.giphy.com/media/I2nZMy0sI0ySA/giphy.gif?cid=790b76112f921a5de89e87335c025099ea53dd307e7e6462&rid=giphy.gif&ct=g" alt="My image">
+    <img src="https://media4.giphy.com/media/LxSFsOTa3ytEY/giphy.gif?cid=790b76112b708427d11cc18c410a8b9872403a96f42a7ac9&rid=giphy.gif&ct=g" alt="My image">
+    <img src="https://media4.giphy.com/media/2KOUaMezKiaic/giphy.gif?cid=ecf05e47rxvi8rigq1vwtrrjcu9mh9jxezrn233se8u233x1&rid=giphy.gif&ct=g" alt="My image">
+    <img src="https://media4.giphy.com/media/Qglpf2QiuCKMU/giphy.gif?cid=790b7611a1706977e373ce0e0a6687177b03f7d54d3207b8&rid=giphy.gif&ct=g" alt="My image">
+    <img src="https://media4.giphy.com/media/2KOUaMezKiaic/giphy.gif?cid=ecf05e47rxvi8rigq1vwtrrjcu9mh9jxezrn233se8u233x1&rid=giphy.gif&ct=g" alt="My image">
+    <img src="https://media1.giphy.com/media/hQ0GvkpZwYcgM/giphy.gif?cid=790b7611258890bd21159e26b48daaa79da0f2d115446d24&rid=giphy.gif&ct=g" alt="My image">
+    <img src="https://media0.giphy.com/media/eXUlPn1gmZavu/giphy.gif?cid=ecf05e47lhq8vzn7o63x9duyolvbkr8dzo4oyd5lo8n697ky&rid=giphy.gif&ct=g" alt="My image">
+  
+    
+    <!-- <img src="still-lake.jpg" alt>
+      <img src="http://channelfrederator.frederator.com/post/112645774641/charmander-used-water-gun-but-it-failed" alt="My image">
+    <img src="https://media2.giphy.com/media/HZpCCbcWc0a3u/giphy.gif?cid=790b76119635dcb771fcb69f21de77a7311b9e8839e5dd2a&rid=giphy.gif&ct=g" alt="My image">
+    <img src="https://media4.giphy.com/media/2KOUaMezKiaic/giphy.gif?cid=ecf05e47rxvi8rigq1vwtrrjcu9mh9jxezrn233se8u233x1&rid=giphy.gif&ct=g" alt="My image">
+  <img src="https://media1.giphy.com/media/zkMri4yiJ3Mdy/giphy.gif?cid=790b761183750eabc2da839eb1905f934ec7cc76fa9d242c&rid=giphy.gif&ct=g" alt=" s">
+    
+    <img src="pink-milford-sound.jpg" alt>
+    <img src="paradise.jpg" alt>
+    <img src="morekai.jpg" alt>
+    <img src="milky-blue-lagoon.jpg" alt>
+    <img src="lake-tekapo.jpg" alt>
+    <img src="milford-sound.jpg" alt> -->
+    </figure>
+</div>
+<span style="float:left"   id="izquierdo" onclick="galleryspin('-')">&lt;</span>
+<span style="float:right"  id="derecho" onclick="galleryspin('')">&gt;</span>
+<!-- partial -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js">
+</script>
+
+  <script >
+    var angle = 0;
+function galleryspin(sign) { 
+spinner = document.querySelector("#spinner");
+if (!sign) { angle = angle + 45; } else { angle = angle - 45; }
+spinner.setAttribute("style",
+"-webkit-transform: rotateY("+ angle +"deg); -moz-transform: rotateY("+ angle +"deg); transform: rotateY("+ angle +"deg);");
+}
+
+console.log(window.location);
+    var loc = window.location;
+    var wsStart = "ws://";
+    if (loc.protocol == "https:") {
+      wsStart = "wss://";
+    }
+    var endpoint = wsStart + loc.host + loc.pathname + "/";
+    var socket = new ReconnectingWebSocket(endpoint);// se abre flujo de comunicación asíncrona
+
+    socket.onmessage = function(e) {// receptor de todos los mensajes, 
+      console.log(e.data);          // es decir de todos los pulsadores virtuales conectados
+      var obj = JSON.parse(e.data); // 
+     
+    
+ 
+      if(obj['name']=='p2') // se discrimina que pulsador se accionó
+          galleryspin('-');      // pulsador rojo
+      if(obj['name']=='pantalla')
+          galleryspin('');      //pulsador verde
+     
+    };
+
+
+
+     
+    socket.onopen = function(e) {
+      console.log("open", e);
+    };
+    socket.onerror = function(e) {
+      console.log("error", e);
+    };
+    socket.onclose = function(e) {
+      console.log("close", e);
+    };
+    function send(name) {
+      // status = (status == 'true');
+      // console.log(!status);
+      // if(id=='#on') {
+      //   $(id).html('off')
+      // } else {
+      //   $(id).html('on')
+      // }
+      var status = $('#'+name).val()
+      // console.log('status' + typeof(status));
+      status = (status == 'true');
+      var data = {
+        name: name,
+        status: !status
+      };
+      socket.send(JSON.stringify(data));
+    }
+  </script>
+
+</body>
+{% endblock %}
+</html>
